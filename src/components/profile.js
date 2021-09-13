@@ -6,12 +6,28 @@ function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+
+
 class Profile extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
+    this.state = {
+      profile: props.profile,
+      name: props.name
+    }
 
     this.handleFormSubmit = this.handleFormSubmit.bind(this);
     this.formMessageRef = React.createRef();
+  }
+
+  onChange(key, value){
+    this.setState({
+      ...this.state,
+      profile: {
+        ...this.state.profile,
+        [key]: value
+      }
+    })
   }
 
   removeInvalidClasses(requiredFields) {
@@ -78,14 +94,20 @@ class Profile extends Component {
           <label className="profile-form__row">
             Name:
             <input
-              defaultValue={this.props.profile.name}
+              value={this.state.profile.name}
+              onChange={(e) => {
+                this.onChange('name', e.target.value)
+              }}
               className="profile-form__field" name="name" type="text"
             />
           </label>
           <label className="profile-form__row">
             Gender:
             <select
-              defaultValue={this.props.profile.gender}
+              value={this.state.profile.gender}
+              onChange={(e) => {
+                this.onChange('gender', e.target.value)
+              }}
               className="profile-form__field profile-form__select" name="gender"
             >
               <option value="unspecified">Unspecified</option>
@@ -96,7 +118,10 @@ class Profile extends Component {
           <label className="profile-form__row">
             Email:
             <input
-              defaultValue={this.props.profile.email}
+              value={this.state.profile.email}
+              onChange={(e) => {
+                this.onChange('email', e.target.value)
+              }}
               className="profile-form__field"
               name="email"
               type="text"
@@ -105,7 +130,10 @@ class Profile extends Component {
           <label className="profile-form__row">
             Phone:
             <input
-              defaultValue={this.props.profile.phone}
+              value={this.state.profile.phone}
+              onChange={(e) => {
+                this.onChange('phone', e.target.value)
+              }}
               className="profile-form__field"
               name="phone"
               type="text"
