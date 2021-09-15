@@ -7,17 +7,17 @@ function capitalizeFirstLetter(string) {
 }
 
 
-
 class Profile extends Component {
   constructor(props) {
     super(props);
     this.state = {
       profile: props.profile,
-      name: props.name
+      form: {
+        invalid: false,
+        invalidFields: [],
+        submitted: false
+      }
     }
-
-    this.handleFormSubmit = this.handleFormSubmit.bind(this);
-    this.formMessageRef = React.createRef();
   }
 
   onChange(key, value){
@@ -30,60 +30,35 @@ class Profile extends Component {
     })
   }
 
-  removeInvalidClasses(requiredFields) {
-    requiredFields.forEach((element) => {
-      element.classList.remove('profile-form__field--invalid');
-    });
-
-    this.formMessageRef.current.innerHTML = '';
-    this.formMessageRef.current.classList.remove('profile-form__message--invalid');
-  }
-
-  addInvalidClassesAndValidationMessage(emptyFields) {
-    const emptyFieldNames = emptyFields.map((element) => element.name);
-
-    this.formMessageRef.current.classList.add('profile-form__message--invalid');
-    this.formMessageRef.current.innerHTML = capitalizeFirstLetter(`${emptyFieldNames.join(', ')} can not be blank`);
-  }
-
-  showFormSuccess() {
-    this.formMessageRef.current.innerHTML = 'Form submitted!';
-  }
-
   handleFormSubmit(event) {
     event.preventDefault();
 
     const requiredFields = [
-      event.target.name,
-      event.target.gender,
-      event.target.email,
-      event.target.phone
+      {value: this.state.profile.name, name: "name"},
+      {value: this.state.profile.gender, name: "gender"},
+      {value: this.state.profile.email, name: "email"},
+      {value: this.state.profile.phone, name: "phone"}
     ];
 
-    const emptyFields = requiredFields.filter((element) => (
-      !Boolean(element.value)
+    const emptyFields = requiredFields.filter((value) => (
+      !Boolean(value.value)
     ));
 
-    this.removeInvalidClasses(requiredFields);
+    this.setState({
+      ...this.state,
+      form: {
+        ...this.state.form,
+        invalidFields: emptyFields.map(f => f.name),
+        invalid: Boolean(emptyFields.length),
+        submitted: true
+      }
+    })
 
-    if (emptyFields.length) {
-      this.addInvalidClassesAndValidationMessage(emptyFields);
+   
 
-      emptyFields.forEach((element) => {
-        element.classList.add('profile-form__field--invalid');
-      });
-
-    } else {
-      this.showFormSuccess();
-
-      console.log({
-        name: event.target.name.value,
-        gender: event.target.gender.value,
-        email: event.target.email.value,
-        phone: event.target.phone.value
-      });
-    }
-
+  }
+  isFieldInvalid(name) {
+    return !!this.state.form.invalidFields.find(field => field === name)
   }
 
   render() {
@@ -98,7 +73,7 @@ class Profile extends Component {
               onChange={(e) => {
                 this.onChange('name', e.target.value)
               }}
-              className="profile-form__field" name="name" type="text"
+              className={`profile-form__field ${this.isFieldInvalid("name") ? "profile-form__field--invalid":"" }`} name="name" type="text"
             />
           </label>
           <label className="profile-form__row">
@@ -108,7 +83,7 @@ class Profile extends Component {
               onChange={(e) => {
                 this.onChange('gender', e.target.value)
               }}
-              className="profile-form__field profile-form__select" name="gender"
+              className={`profile-form__field profile-form__select ${this.isFieldInvalid("gender") ? "profile-form__field--invalid":"" }` } name="gender"
             >
               <option value="unspecified">Unspecified</option>
               <option value="male">Male</option>
@@ -122,7 +97,7 @@ class Profile extends Component {
               onChange={(e) => {
                 this.onChange('email', e.target.value)
               }}
-              className="profile-form__field"
+              className={`profile-form__field ${this.isFieldInvalid("email") ? "profile-form__field--invalid":"" }`}
               name="email"
               type="text"
             />
@@ -134,7 +109,7 @@ class Profile extends Component {
               onChange={(e) => {
                 this.onChange('phone', e.target.value)
               }}
-              className="profile-form__field"
+              className={`profile-form__field ${this.isFieldInvalid("phone") ? "profile-form__field--invalid":"" }`}
               name="phone"
               type="text"
             />
@@ -143,10 +118,15 @@ class Profile extends Component {
             <input type="submit" value="Save" />
           </div>
           <div className="profile-form__row">
-            <span
-              ref={this.formMessageRef}
+            {this.state.form.invalid || this.state.form.submitted ? (
+               <span
+              
               className="profile-form__message"
-            />
+            >
+              {this.state.form.invalid ? `${this.state.form.invalidFields.map(capitalizeFirstLetter).join(", ")} cannot be empty` : "form submitted" }
+            </span>
+            ): null}
+            
           </div>
         </form>
       </div>
